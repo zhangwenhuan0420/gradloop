@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GradLoop | 英国留学生二手交易</title>
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="GradLoop 首页">
+        <span class="brand-mark">G</span>
+        <span>
+          <strong>GradLoop</strong>
+          <small>UK student resale</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="主要导航">
+        <a href="#market">逛市场</a>
+        <a href="#how">交易方式</a>
+        <a href="#escrow">保证金</a>
+        <a href="#safety">安全提示</a>
+      </nav>
+      <button class="ghost-button" id="openPostTop">发布</button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">给英国毕业季一个更靠谱的二手市场</p>
+          <h1>把带不走的东西，卖给刚好需要的人。</h1>
+          <p class="hero-text">
+            面向英国留学生的同城二手交易平台。发布想卖、想买、可自取或可邮寄的商品，
+            不再让好东西淹没在微信群聊天记录里。
+          </p>
+          <div class="hero-actions">
+            <button class="primary-button" id="openPostHero">发布商品</button>
+            <a class="secondary-button" href="#market">看看市场</a>
+          </div>
+          <div class="hero-stats" aria-label="平台数据示例">
+            <span><strong>8</strong> 个热门城市</span>
+            <span><strong>24h</strong> 毕业季快速曝光</span>
+            <span><strong>0 管理费</strong> 免费试用版</span>
+          </div>
+        </div>
+        <div class="hero-panel" aria-label="热门商品预览">
+          <img
+            src="https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=900&q=85"
+            alt="桌面上的笔记本电脑"
+          />
+          <div class="floating-card">
+            <span class="status-dot"></span>
+            <span>曼彻斯特 · MacBook Air · 可今晚面交</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="search-band" id="market">
+        <div class="search-box">
+          <label for="searchInput">搜索商品或关键词</label>
+          <input id="searchInput" type="search" placeholder="例如：电饭煲、自行车、显示器" />
+        </div>
+        <div class="filter-row" role="group" aria-label="筛选器">
+          <select id="cityFilter" aria-label="城市">
+            <option value="all">全部城市</option>
+          </select>
+          <select id="categoryFilter" aria-label="品类">
+            <option value="all">全部品类</option>
+          </select>
+          <select id="typeFilter" aria-label="类型">
+            <option value="all">想买 / 想卖</option>
+            <option value="sell">只看想卖</option>
+            <option value="buy">只看想买</option>
+          </select>
+          <button class="primary-button small" id="openPostFilter">发布</button>
+        </div>
+      </section>
+
+      <section class="market-layout">
+        <aside class="sidebar" aria-label="快捷筛选">
+          <h2>毕业季快捷入口</h2>
+          <button class="chip active" data-quick="all">全部</button>
+          <button class="chip" data-quick="pickup">同城自取</button>
+          <button class="chip" data-quick="delivery">支持快递</button>
+          <button class="chip" data-quick="urgent">急出</button>
+          <button class="chip" data-quick="saved">已收藏</button>
+          <div class="notice">
+            <strong>交易建议</strong>
+            <p>优先选择校园、车站或商场等公共地点面交。贵重物品建议验机后再付款。</p>
+          </div>
+        </aside>
+
+        <section class="listings" aria-live="polite">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Marketplace</p>
+              <h2>最新发布</h2>
+            </div>
+            <span id="resultCount"></span>
+          </div>
+          <div class="card-grid" id="listingGrid"></div>
+          <div class="empty-state" id="emptyState" hidden>
+            <h3>没有找到匹配的商品</h3>
+            <p>换个关键词试试，或者发布一个“想买”需求，让卖家来找你。</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="how" id="how">
+        <div class="section-heading centered">
+          <p class="eyebrow">How it works</p>
+          <h2>为留学生生活节奏设计</h2>
+        </div>
+        <div class="steps">
+          <article>
+            <span>1</span>
+            <h3>发布想卖或想买</h3>
+            <p>上传商品、价格、城市和交易方式。毕业搬家时可以标记“急出”。</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h3>平台托管保证金</h3>
+            <p>买家先托管等额保证金，卖家按比例托管保证金，双方都有动力按时完成交易。</p>
+          </article>
+          <article>
+            <span>3</span>
+            <h3>面交或快递</h3>
+            <p>双方自行约定公共地点面交，或选择 Royal Mail、Evri 等英国本地快递，完成后释放保证金。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="escrow" id="escrow">
+        <div class="section-heading centered">
+          <p class="eyebrow">Deposit escrow</p>
+          <h2>保证金与投诉处理机制</h2>
+        </div>
+        <div class="escrow-grid">
+          <article>
+            <strong>买家保证金</strong>
+            <span>成交价 100%</span>
+            <p>买家下单后向平台托管与商品金额相同的保证金，避免临时爽约。</p>
+          </article>
+          <article>
+            <strong>卖家保证金</strong>
+            <span>默认成交价 50%</span>
+            <p>卖家发布时选择保证金比例，默认 50%，用于约束跑单和虚假交付。</p>
+          </article>
+          <article>
+            <strong>问题扣罚</strong>
+            <span>默认 10%，客服可调</span>
+            <p>若商品明显不符、隐瞒故障或交付异常，客服可按证据在 0-50% 区间裁定扣罚。</p>
+          </article>
+        </div>
+        <div class="admin-panel" aria-label="平台客服仲裁扣罚模拟器">
+          <div>
+            <p class="eyebrow">Admin review</p>
+            <h3>客服投诉审理扣罚</h3>
+            <p>平台客服可根据聊天记录、现场照片、验货视频和双方说明，调节实际扣罚比例。</p>
+          </div>
+          <label>
+            模拟成交价
+            <input id="reviewPrice" type="number" min="1" value="120" />
+          </label>
+          <label>
+            实际扣罚比例：<strong id="penaltyRateLabel">10%</strong>
+            <input id="penaltyRate" type="range" min="0" max="50" value="10" />
+          </label>
+          <div class="review-result">
+            <span>客服裁定扣罚</span>
+            <strong id="penaltyAmount">£12</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="safety" id="safety">
+        <div>
+          <p class="eyebrow">Safety first</p>
+          <h2>让交易更放心</h2>
+          <p>
+            未来版本可以接入学生邮箱认证、评价体系、举报机制、托管支付和自动争议判责。
+            这个免费试用版先展示核心交易流程、保证金规则与产品方向，不收任何交易服务费。
+          </p>
+        </div>
+        <ul>
+          <li>学生邮箱或手机号验证</li>
+          <li>平台托管买卖双方保证金</li>
+          <li>校园附近安全面交点推荐</li>
+          <li>聊天记录与交易状态留存</li>
+          <li>买家卖家互评与黑名单</li>
+        </ul>
+      </section>
+    </main>
+
+    <dialog class="post-dialog" id="postDialog">
+      <form method="dialog" class="post-form" id="postForm">
+        <div class="dialog-title">
+          <div>
+            <p class="eyebrow">New listing</p>
+            <h2>发布二手信息</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭">×</button>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            类型
+            <select name="type" required>
+              <option value="sell">我想卖</option>
+              <option value="buy">我想买</option>
+            </select>
+          </label>
+          <label>
+            城市
+            <select name="city" required>
+              <option>London</option>
+              <option>Manchester</option>
+              <option>Birmingham</option>
+              <option>Edinburgh</option>
+              <option>Glasgow</option>
+              <option>Leeds</option>
+              <option>Nottingham</option>
+              <option>Bristol</option>
+            </select>
+          </label>
+          <label>
+            商品名称
+            <input name="title" maxlength="48" placeholder="例如：九成新电饭煲" required />
+          </label>
+          <label>
+            价格
+            <input name="price" type="number" min="0" step="1" placeholder="35" required />
+          </label>
+          <label>
+            品类
+            <select name="category" required>
+              <option>电子数码</option>
+              <option>厨房家电</option>
+              <option>家具家居</option>
+              <option>交通出行</option>
+              <option>书籍资料</option>
+              <option>生活杂物</option>
+            </select>
+          </label>
+          <label>
+            交易方式
+            <select name="method" required>
+              <option value="pickup">同城自取</option>
+              <option value="delivery">支持快递</option>
+              <option value="both">自取或快递</option>
+            </select>
+          </label>
+          <label>
+            卖家保证金比例
+            <select name="sellerDepositRate" required>
+              <option value="0.5">50%（推荐）</option>
+              <option value="0.3">30%</option>
+              <option value="0.7">70%</option>
+              <option value="1">100%</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          描述
+          <textarea name="description" rows="4" placeholder="成色、购买时间、瑕疵、取货地点等" required></textarea>
+        </label>
+
+        <label class="checkbox">
+          <input name="urgent" type="checkbox" />
+          <span>毕业搬家急出 / 急需</span>
+        </label>
+
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">取消</button>
+          <button class="primary-button" value="default" type="submit">发布到市场</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
