@@ -57,6 +57,11 @@
         </div>
       </section>
 
+      <section class="status-band" id="backendStatus" aria-live="polite">
+        <strong>正在检查平台连接...</strong>
+        <span>如果已配置 Supabase，用户发布的商品会进入真实数据库。</span>
+      </section>
+
       <section class="search-band" id="market">
         <div class="search-box">
           <label for="searchInput">搜索商品或关键词</label>
@@ -261,6 +266,26 @@
               <option value="1">100%</option>
             </select>
           </label>
+          <label>
+            联系人昵称
+            <input name="contactName" maxlength="32" placeholder="例如：小张" required />
+          </label>
+          <label>
+            联系方式类型
+            <select name="contactMethod" required>
+              <option value="wechat">微信</option>
+              <option value="email">邮箱</option>
+              <option value="phone">手机号</option>
+            </select>
+          </label>
+          <label>
+            联系方式
+            <input name="contactValue" maxlength="80" placeholder="买家点击联系时显示" required />
+          </label>
+          <label>
+            图片链接
+            <input name="image" type="url" placeholder="可选：粘贴商品图片 URL" />
+          </label>
         </div>
 
         <label>
@@ -280,6 +305,43 @@
       </form>
     </dialog>
 
+    <dialog class="post-dialog" id="reportDialog">
+      <form method="dialog" class="post-form" id="reportForm">
+        <div class="dialog-title">
+          <div>
+            <p class="eyebrow">Report listing</p>
+            <h2>举报商品</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <input type="hidden" name="listingId" />
+        <label>
+          举报原因
+          <select name="reason" required>
+            <option value="虚假信息">虚假信息</option>
+            <option value="疑似诈骗">疑似诈骗</option>
+            <option value="违禁物品">违禁物品</option>
+            <option value="已售但未下架">已售但未下架</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label>
+          说明
+          <textarea name="details" rows="4" placeholder="请简单说明问题，方便管理员判断" required></textarea>
+        </label>
+        <label>
+          你的联系方式（可选）
+          <input name="reporterContact" maxlength="80" placeholder="微信或邮箱，便于管理员追问" />
+        </label>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">取消</button>
+          <button class="primary-button" value="default" type="submit">提交举报</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

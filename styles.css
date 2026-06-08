@@ -270,6 +270,37 @@ h3 {
   background: white;
 }
 
+.status-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px clamp(18px, 4vw, 54px);
+  border-block: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.status-band strong {
+  color: var(--ink);
+}
+
+.status-band.live {
+  border-color: #b8dfc4;
+  background: #ecf8ef;
+}
+
+.status-band.demo,
+.status-band.loading {
+  border-color: #ead8ad;
+  background: #fff8e8;
+}
+
+.status-band.error {
+  border-color: #e5b8b8;
+  background: #fff0f0;
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -487,7 +518,7 @@ textarea:focus {
 
 .escrow-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 10px;
   border: 1px solid var(--line);
@@ -541,6 +572,29 @@ textarea:focus {
   color: var(--accent-dark);
   cursor: pointer;
   font-weight: 800;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.report-button,
+.admin-row-side button {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.report-button:hover,
+.admin-row-side button:hover {
+  color: var(--accent-dark);
+  border-color: var(--accent);
 }
 
 .empty-state {
@@ -754,6 +808,71 @@ textarea:focus {
   max-width: 780px;
 }
 
+.admin-login-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 10px;
+  min-width: min(100%, 460px);
+}
+
+.admin-table {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.admin-row p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.admin-row-side {
+  display: grid;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.status-pill {
+  width: fit-content;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.status-pill.active {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.status-pill.hidden {
+  background: #f3dddd;
+  color: #8a3535;
+}
+
+.status-pill.sold {
+  background: #e9e9e9;
+  color: #4f5a52;
+}
+
+.status-pill.flagged {
+  background: #fff0d8;
+  color: #86510e;
+}
+
 .safety {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.7fr);
@@ -878,6 +997,11 @@ textarea:focus {
     flex-direction: column;
   }
 
+  .admin-login-form,
+  .admin-row {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 @media (max-width: 560px) {
@@ -917,6 +1041,13 @@ textarea:focus {
   }
 
   .escrow-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .status-band,
+  .card-actions {
+    align-items: stretch;
+    flex-direction: column;
     grid-template-columns: 1fr;
   }
 }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GradLoop 管理者控制台 | 免费试用版</title>
+    <title>GradLoop 管理后台</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -17,108 +17,82 @@
       </a>
       <nav class="nav" aria-label="管理导航">
         <a href="./index.html#market">返回市场</a>
-        <a href="#current">当前边界</a>
-        <a href="#roadmap">后台路线</a>
+        <a href="#listings">商品审核</a>
+        <a href="#reports">举报工单</a>
       </nav>
-      <a class="ghost-button" href="./index.html">首页</a>
+      <button class="ghost-button" id="signOutButton" hidden>退出</button>
     </header>
 
     <main>
       <section class="admin-hero">
-        <p class="eyebrow">Owner view</p>
-        <h1>管理者控制台</h1>
+        <p class="eyebrow">Owner console</p>
+        <h1>GradLoop 管理后台</h1>
         <p class="hero-text">
-          这是 GradLoop 免费市场调研版的管理入口。当前版本部署在 GitHub Pages，
-          适合展示、拉新和验证需求；真正的删帖、审核、举报处理和用户管理，需要下一阶段接入数据库和后台权限。
+          登录后可以查看全站商品、下架违规内容、恢复商品、标记已成交，并处理用户举报。
+          这个后台使用 Supabase Auth 和数据库权限控制，只有你加入 admin_users 表的邮箱可以管理。
         </p>
-        <div class="hero-stats">
-          <span><strong>免费试用</strong> 不收交易服务费</span>
-          <span><strong>静态网站</strong> GitHub Pages 托管</span>
-          <span><strong>本地数据</strong> 用户浏览器内保存</span>
-        </div>
       </section>
 
-      <section class="admin-section" id="current">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Current version</p>
-            <h2>你现在能管理什么</h2>
-          </div>
-        </div>
-        <div class="admin-grid">
-          <article>
-            <strong>平台规则和页面内容</strong>
-            <p>你可以通过 GitHub 仓库更新首页文案、交易规则、安全提示、城市和品类。</p>
-          </article>
-          <article>
-            <strong>市场调研入口</strong>
-            <p>你可以把公开链接发给同学，收集他们是否愿意发布二手商品、想要哪些功能。</p>
-          </article>
-          <article>
-            <strong>人工运营策略</strong>
-            <p>试用期可以用微信群、表单或私信收集举报和反馈，先验证用户愿不愿意用。</p>
-          </article>
-        </div>
-
-        <div class="admin-warning">
-          <h3>当前版本不能做的事</h3>
-          <ul>
-            <li>你看不到所有用户发布的商品，因为商品只存在发布者自己的浏览器里。</li>
-            <li>你不能远程删除别人的商品，也不能真正封禁用户。</li>
-            <li>你不能处理真实保证金、退款、站内聊天或支付纠纷。</li>
-            <li>刷新、换设备、清理浏览器数据后，本地演示数据可能消失。</li>
-          </ul>
-        </div>
+      <section class="status-band" id="adminStatus" aria-live="polite">
+        <strong>正在检查后台配置...</strong>
+        <span>如果还没配置 Supabase，请先按 README 和 SQL 脚本完成后端设置。</span>
       </section>
 
-      <section class="admin-section" id="roadmap">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Next build</p>
-            <h2>真正平台后台需要这些模块</h2>
-          </div>
-        </div>
-        <div class="admin-grid wide">
-          <article>
-            <strong>用户和学生认证</strong>
-            <p>注册登录、.ac.uk 邮箱验证、手机号验证、黑名单和用户评分。</p>
-          </article>
-          <article>
-            <strong>商品数据库</strong>
-            <p>所有发布内容进入数据库，管理员可搜索、下架、恢复、标记可疑商品。</p>
-          </article>
-          <article>
-            <strong>举报和客服工单</strong>
-            <p>买卖双方提交证据，客服按规则处理投诉、记录结果和扣罚建议。</p>
-          </article>
-          <article>
-            <strong>聊天和交易状态</strong>
-            <p>站内私信、交易流程、已约面交、已完成、投诉中、已关闭。</p>
-          </article>
-          <article>
-            <strong>数据看板</strong>
-            <p>查看每日发布数、热门城市、热门品类、转化率、举报数量和留存。</p>
-          </article>
-          <article>
-            <strong>合规支付接入</strong>
-            <p>等验证出真实需求后，再考虑 Stripe Connect、Adyen、微信支付或支付宝商户接入。</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="admin-section">
+      <section class="admin-section" id="loginPanel">
         <div class="admin-next">
           <div>
-            <p class="eyebrow">Practical next step</p>
-            <h2>现在最推荐的运营方式</h2>
-            <p>
-              先把这个免费链接发给 20-50 位英国中国留学生，问他们是否愿意发布商品。
-              如果有人真的愿意用，我们再把平台升级到 Supabase 或 Firebase 后台，让你能真正管理用户和商品。
-            </p>
+            <p class="eyebrow">Admin login</p>
+            <h2>管理员邮箱登录</h2>
+            <p>输入管理员邮箱后，Supabase 会发送 Magic Link。点击邮件里的链接回到此页面即可进入后台。</p>
           </div>
-          <a class="primary-button" href="./index.html#market">查看试用版市场</a>
+          <form class="admin-login-form" id="adminLoginForm">
+            <input name="email" type="email" placeholder="管理员邮箱" required />
+            <button class="primary-button" type="submit">发送登录链接</button>
+          </form>
         </div>
       </section>
+
+      <section class="admin-section" id="dashboardPanel" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Dashboard</p>
+            <h2>平台概览</h2>
+          </div>
+          <button class="secondary-button" id="refreshAdmin">刷新数据</button>
+        </div>
+        <div class="admin-grid" id="statsGrid"></div>
+      </section>
+
+      <section class="admin-section" id="listings" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Moderation</p>
+            <h2>商品审核</h2>
+          </div>
+          <select id="adminStatusFilter" aria-label="商品状态筛选">
+            <option value="all">全部状态</option>
+            <option value="active">展示中</option>
+            <option value="hidden">已下架</option>
+            <option value="sold">已成交</option>
+            <option value="flagged">待处理</option>
+          </select>
+        </div>
+        <div class="admin-table" id="adminListings"></div>
+      </section>
+
+      <section class="admin-section" id="reports" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Reports</p>
+            <h2>举报工单</h2>
+          </div>
+        </div>
+        <div class="admin-table" id="adminReports"></div>
+      </section>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
+    <script src="./admin.js"></script>
   </body>
 </html>
