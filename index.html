@@ -399,8 +399,9 @@
         </label>
         <div class="notice">
           <strong>当前为担保交易申请</strong>
-          <p>提交后会进入管理员后台。正式保证金支付接入前，平台会先人工联系双方确认交易。</p>
+          <p>提交后会进入管理员后台。如果微信支付已启用，系统会生成买家保证金二维码；否则平台会先人工联系双方确认交易。</p>
         </div>
+        <div class="payment-result" id="paymentResult" hidden></div>
         <div class="dialog-actions">
           <button class="secondary-button" value="cancel">取消</button>
           <button class="primary-button" value="default" type="submit">提交担保交易申请</button>
@@ -409,6 +410,7 @@
     </dialog>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="./config.js"></script>
     <script src="./app.js"></script>
   </body>

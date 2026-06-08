@@ -399,6 +399,77 @@ textarea:focus {
   line-height: 1.55;
 }
 
+.payment-result {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.payment-result[hidden] {
+  display: none;
+}
+
+.payment-result p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.payment-result.live {
+  border-color: #b8dfc4;
+  background: #ecf8ef;
+}
+
+.payment-result.loading {
+  border-color: #ead8ad;
+  background: #fff8e8;
+}
+
+.payment-result.error {
+  border-color: #e5b8b8;
+  background: #fff0f0;
+}
+
+.payment-qr {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.payment-qr canvas {
+  width: 220px;
+  height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.payment-qr span,
+.payment-qr small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.payment-qr strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--accent-dark);
+  font-size: 20px;
+}
+
+.payment-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .section-heading {
   display: flex;
   align-items: end;
@@ -1049,5 +1120,15 @@ textarea:focus {
     align-items: stretch;
     flex-direction: column;
     grid-template-columns: 1fr;
+  }
+
+  .payment-qr {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-qr canvas {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
   }
 }

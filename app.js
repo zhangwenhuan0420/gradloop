@@ -114,7 +114,10 @@ const seedListings = [
 ];
 
 const config = window.GRADLOOP_CONFIG || {};
+const paymentConfig = config.payments || {};
 const hasSupabaseConfig = Boolean(config.supabaseUrl && config.supabaseAnonKey);
+const hasWechatPay =
+  Boolean(paymentConfig.wechatPayEnabled && paymentConfig.wechatNativeFunctionName) && hasSupabaseConfig;
 const db =
   hasSupabaseConfig && window.supabase
     ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey)
@@ -143,6 +146,7 @@ const openTradeRequestButton = document.querySelector("#openTradeRequest");
 const tradeDialog = document.querySelector("#tradeDialog");
 const tradeForm = document.querySelector("#tradeForm");
 const tradeSummary = document.querySelector("#tradeSummary");
+const paymentResult = document.querySelector("#paymentResult");
 const backendStatus = document.querySelector("#backendStatus");
 const reviewPrice = document.querySelector("#reviewPrice");
 const penaltyRate = document.querySelector("#penaltyRate");
@@ -230,6 +234,12 @@ function friendlyError(error) {
   }
   if (message.includes("trade_requests")) {
     return "担保交易表还没创建，请在 Supabase SQL Editor 运行 add-trade-requests.sql。";
+  }
+  if (message.includes("payment_orders")) {
+    return "微信支付订单表还没创建，请在 Supabase SQL Editor 运行 add-wechat-payments.sql。";
+  }
+  if (message.includes("FunctionsHttpError") || message.includes("Edge Function")) {
+    return "微信支付后端函数还没部署或密钥未配置。请先按 README 的 WeChat Pay 步骤部署 Supabase Edge Functions。";
   }
   return message || "请检查数据库配置";
 }
@@ -330,6 +340,71 @@ function escrowFor(item) {
     issuePenalty: price * 0.1,
     sellerDepositRate,
   };
+}
+
+function settlementMoney(value) {
+  const currency = paymentConfig.settlementCurrency || "CNY";
+  return `${currency} ${Number(value || 0).toFixed(2).replace(/\.00$/, "")}`;
+}
+
+function resetPaymentResult() {
+  if (!paymentResult) return;
+  paymentResult.hidden = true;
+  paymentResult.innerHTML = "";
+}
+
+function setPaymentResult(kind, title, detail, extraHtml = "") {
+  if (!paymentResult) return;
+  paymentResult.hidden = false;
+  paymentResult.className = `payment-result ${kind}`;
+  paymentResult.innerHTML = `
+    <strong>${escapeHtml(title)}</strong>
+    <p>${escapeHtml(detail)}</p>
+    ${extraHtml}
+  `;
+}
+
+async function renderPaymentQr(container, codeUrl) {
+  const canvas = container.querySelector("canvas");
+  if (!canvas || !codeUrl) return;
+
+  if (window.QRCode?.toCanvas) {
+    await window.QRCode.toCanvas(canvas, codeUrl, {
+      width: 220,
+      margin: 1,
+      color: {
+        dark: "#17211b",
+        light: "#ffffff",
+      },
+    });
+    return;
+  }
+
+  const fallback = document.createElement("a");
+  fallback.href = codeUrl;
+  fallback.target = "_blank";
+  fallback.rel = "noreferrer";
+  fallback.textContent = "打开微信支付链接";
+  canvas.replaceWith(fallback);
+}
+
+async function createWechatPayment(tradeRequestId, payerRole) {
+  if (!db || !hasWechatPay) {
+    throw new Error("WeChat Pay is not enabled.");
+  }
+
+  const { data, error } = await db.functions.invoke(paymentConfig.wechatNativeFunctionName, {
+    body: {
+      tradeRequestId,
+      payerRole,
+    },
+  });
+
+  if (error) throw error;
+  if (!data?.codeUrl) {
+    throw new Error(data?.error || "微信支付二维码生成失败。");
+  }
+  return data;
 }
 
 function matchesQuick(item) {
@@ -526,12 +601,14 @@ function openContactCard(id) {
 function openTradeDialog() {
   if (!selectedListing || !tradeDialog || !tradeForm || !tradeSummary) return;
   const escrow = escrowFor(selectedListing);
+  resetPaymentResult();
   tradeForm.elements.listingId.value = selectedListing.id;
   tradeSummary.innerHTML = `
     <div class="trade-summary">
       <strong>${escapeHtml(selectedListing.title)}</strong>
       <span>${escapeHtml(selectedListing.city)} · ${money(selectedListing.price)}</span>
       <span>买家需托管：${money(escrow.buyerDeposit)} · 卖家保证金：${money(escrow.sellerDeposit)}</span>
+      <span>${hasWechatPay ? "微信支付已接入，提交后会生成买家保证金二维码。" : "微信支付未启用，提交后由管理员人工联系双方。"}</span>
     </div>
   `;
   contactDialog?.close();
@@ -560,10 +637,36 @@ async function submitTradeRequest(event) {
     status: "pending_review",
   };
 
+  const submitButton = tradeForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.textContent = hasWechatPay ? "正在生成支付二维码..." : "正在提交...";
+  resetPaymentResult();
+
   try {
     if (db) {
-      const { error } = await db.from("trade_requests").insert(request);
+      const { data, error } = await db.from("trade_requests").insert(request).select("id").single();
       if (error) throw error;
+
+      if (hasWechatPay) {
+        setPaymentResult("loading", "交易申请已提交", "正在向微信支付创建买家保证金二维码，请稍等。");
+        const payment = await createWechatPayment(data.id, "buyer");
+        const qrHtml = `
+          <div class="payment-qr">
+            <canvas aria-label="微信支付二维码"></canvas>
+            <div>
+              <span>买家保证金</span>
+              <strong>${settlementMoney(payment.amountCny)}</strong>
+              <p>请用微信扫码支付。支付成功后，后台会通过微信回调自动更新订单状态。</p>
+              <small>商户订单号：${escapeHtml(payment.outTradeNo)}</small>
+            </div>
+          </div>
+        `;
+        setPaymentResult("live", "微信支付二维码已生成", "请扫码缴纳买家保证金。", qrHtml);
+        await renderPaymentQr(paymentResult, payment.codeUrl);
+        tradeForm.reset();
+        return;
+      }
+
       alert("担保交易申请已提交。管理员会在后台看到，并联系双方确认下一步。");
     } else {
       alert("演示模式下不会进入后台。配置 Supabase 后，担保交易申请会保存到数据库。");
@@ -572,7 +675,11 @@ async function submitTradeRequest(event) {
     tradeDialog.close();
   } catch (error) {
     console.error(error);
-    alert(`提交失败：${friendlyError(error)}`);
+    setPaymentResult("error", "提交或支付创建失败", friendlyError(error));
+  }
+  finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "提交担保交易申请";
   }
 }
 

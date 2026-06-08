@@ -58,6 +58,28 @@ create table if not exists public.trade_requests (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.payment_orders (
+  id uuid primary key default gen_random_uuid(),
+  trade_request_id uuid not null references public.trade_requests(id) on delete cascade,
+  payer_role text not null check (payer_role in ('buyer', 'seller')),
+  provider text not null default 'wechat_pay' check (provider in ('wechat_pay')),
+  out_trade_no text not null unique check (char_length(out_trade_no) between 6 and 32),
+  transaction_id text,
+  amount_gbp numeric(10, 2) not null default 0 check (amount_gbp >= 0),
+  amount_cny numeric(10, 2) not null default 0 check (amount_cny >= 0),
+  amount_cny_fen integer not null default 0 check (amount_cny_fen >= 0),
+  currency text not null default 'CNY',
+  code_url text,
+  status text not null default 'created' check (status in ('created', 'qr_created', 'paid', 'failed', 'closed', 'refunded')),
+  raw_request jsonb,
+  raw_response jsonb,
+  raw_notify jsonb,
+  expires_at timestamptz,
+  paid_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create or replace function public.increment_listing_report_count()
 returns trigger
 language plpgsql
@@ -83,6 +105,7 @@ alter table public.admin_users enable row level security;
 alter table public.listings enable row level security;
 alter table public.listing_reports enable row level security;
 alter table public.trade_requests enable row level security;
+alter table public.payment_orders enable row level security;
 
 drop policy if exists "admin_users_select_self" on public.admin_users;
 create policy "admin_users_select_self"
@@ -170,9 +193,36 @@ with check (exists (
   where email = auth.jwt() ->> 'email'
 ));
 
+drop policy if exists "admins_read_payment_orders" on public.payment_orders;
+create policy "admins_read_payment_orders"
+on public.payment_orders
+for select
+to authenticated
+using (exists (
+  select 1 from public.admin_users
+  where email = auth.jwt() ->> 'email'
+));
+
+drop policy if exists "admins_update_payment_orders" on public.payment_orders;
+create policy "admins_update_payment_orders"
+on public.payment_orders
+for update
+to authenticated
+using (exists (
+  select 1 from public.admin_users
+  where email = auth.jwt() ->> 'email'
+))
+with check (exists (
+  select 1 from public.admin_users
+  where email = auth.jwt() ->> 'email'
+));
+
 create index if not exists listings_status_created_at_idx on public.listings(status, created_at desc);
 create index if not exists listings_city_idx on public.listings(city);
 create index if not exists listings_category_idx on public.listings(category);
 create index if not exists listing_reports_listing_id_idx on public.listing_reports(listing_id);
 create index if not exists trade_requests_listing_id_idx on public.trade_requests(listing_id);
 create index if not exists trade_requests_status_created_at_idx on public.trade_requests(status, created_at desc);
+create index if not exists payment_orders_trade_request_id_idx on public.payment_orders(trade_request_id);
+create index if not exists payment_orders_status_created_at_idx on public.payment_orders(status, created_at desc);
+create index if not exists payment_orders_out_trade_no_idx on public.payment_orders(out_trade_no);

@@ -1,0 +1,8 @@
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+supabase/.env
+supabase/.temp

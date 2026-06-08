@@ -110,7 +110,24 @@
       </section>
     </main>
 
+    <dialog class="post-dialog" id="adminPaymentDialog">
+      <form method="dialog" class="post-form">
+        <div class="dialog-title">
+          <div>
+            <p class="eyebrow">WeChat Pay</p>
+            <h2>保证金支付二维码</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <div class="payment-result" id="adminPaymentResult"></div>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">关闭</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="./config.js"></script>
     <script src="./admin.js"></script>
   </body>

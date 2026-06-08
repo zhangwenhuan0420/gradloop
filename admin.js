@@ -1,5 +1,8 @@
 const config = window.GRADLOOP_CONFIG || {};
+const paymentConfig = config.payments || {};
 const hasSupabaseConfig = Boolean(config.supabaseUrl && config.supabaseAnonKey);
+const hasWechatPay =
+  Boolean(paymentConfig.wechatPayEnabled && paymentConfig.wechatNativeFunctionName) && hasSupabaseConfig;
 const db =
   hasSupabaseConfig && window.supabase
     ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey)
@@ -20,9 +23,12 @@ const adminTrades = document.querySelector("#adminTrades");
 const adminReports = document.querySelector("#adminReports");
 const adminStatusFilter = document.querySelector("#adminStatusFilter");
 const tradeStatusFilter = document.querySelector("#tradeStatusFilter");
+const adminPaymentDialog = document.querySelector("#adminPaymentDialog");
+const adminPaymentResult = document.querySelector("#adminPaymentResult");
 
 let allListings = [];
 let allTrades = [];
+let allPayments = [];
 let allReports = [];
 
 function setStatus(kind, title, detail) {
@@ -41,6 +47,11 @@ function escapeHtml(value) {
 
 function money(value) {
   return `£${Number(value || 0).toFixed(2).replace(/\.00$/, "")}`;
+}
+
+function settlementMoney(value) {
+  const currency = paymentConfig.settlementCurrency || "CNY";
+  return `${currency} ${Number(value || 0).toFixed(2).replace(/\.00$/, "")}`;
 }
 
 function formatDate(value) {
@@ -82,6 +93,84 @@ function contactLabel(method) {
     phone: "手机号",
   };
   return labels[method] || "联系方式";
+}
+
+function paymentRoleLabel(role) {
+  return role === "seller" ? "卖家保证金" : "买家保证金";
+}
+
+function paymentStatusLabel(status) {
+  const labels = {
+    created: "已创建",
+    qr_created: "二维码已生成",
+    paid: "已支付",
+    failed: "失败",
+    closed: "已关闭",
+    refunded: "已退款",
+  };
+  return labels[status] || status;
+}
+
+function renderPaymentBadges(tradeId) {
+  const payments = allPayments.filter((payment) => payment.trade_request_id === tradeId);
+  if (!payments.length) return `<p>保证金支付：暂未生成微信支付订单</p>`;
+
+  return `
+    <div class="payment-badges">
+      ${payments
+        .map(
+          (payment) => `
+            <span class="status-pill ${payment.status === "paid" ? "active" : "flagged"}">
+              ${paymentRoleLabel(payment.payer_role)} · ${paymentStatusLabel(payment.status)} · ${settlementMoney(payment.amount_cny)}
+            </span>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+async function renderPaymentQr(container, codeUrl) {
+  const canvas = container?.querySelector("canvas");
+  if (!canvas || !codeUrl) return;
+
+  if (window.QRCode?.toCanvas) {
+    await window.QRCode.toCanvas(canvas, codeUrl, {
+      width: 220,
+      margin: 1,
+      color: {
+        dark: "#17211b",
+        light: "#ffffff",
+      },
+    });
+    return;
+  }
+
+  const fallback = document.createElement("a");
+  fallback.href = codeUrl;
+  fallback.target = "_blank";
+  fallback.rel = "noreferrer";
+  fallback.textContent = "打开微信支付链接";
+  canvas.replaceWith(fallback);
+}
+
+async function createWechatPayment(tradeRequestId, payerRole) {
+  if (!db || !hasWechatPay) {
+    throw new Error("微信支付尚未启用。请先部署 Supabase Edge Function 并打开 config.js 的 wechatPayEnabled。");
+  }
+
+  const { data, error } = await db.functions.invoke(paymentConfig.wechatNativeFunctionName, {
+    body: {
+      tradeRequestId,
+      payerRole,
+    },
+  });
+
+  if (error) throw error;
+  if (!data?.codeUrl) {
+    throw new Error(data?.error || "微信支付二维码生成失败。");
+  }
+  return data;
 }
 
 function showAuthedUi(show) {
@@ -144,7 +233,7 @@ async function sendMagicLink(event) {
 
 async function loadAdminData() {
   setStatus("loading", "正在读取后台数据", "正在加载全站商品和举报工单。");
-  const [listingsResult, tradesResult, reportsResult] = await Promise.all([
+  const [listingsResult, tradesResult, reportsResult, paymentsResult] = await Promise.all([
     db.from("listings").select("*").order("created_at", { ascending: false }),
     db
       .from("trade_requests")
@@ -154,6 +243,7 @@ async function loadAdminData() {
       .from("listing_reports")
       .select("*, listings(title, city, status)")
       .order("created_at", { ascending: false }),
+    db.from("payment_orders").select("*").order("created_at", { ascending: false }),
   ]);
 
   if (listingsResult.error) {
@@ -173,8 +263,15 @@ async function loadAdminData() {
 
   allListings = listingsResult.data || [];
   allTrades = tradesResult.data || [];
+  allPayments = paymentsResult.error ? [] : paymentsResult.data || [];
   allReports = reportsResult.data || [];
-  setStatus("live", "后台数据已同步", "你现在可以管理商品和查看举报。");
+  setStatus(
+    paymentsResult.error ? "demo" : "live",
+    "后台数据已同步",
+    paymentsResult.error
+      ? "商品和交易已加载；如果要启用微信支付，请先运行 add-wechat-payments.sql。"
+      : "你现在可以管理商品、查看举报和跟踪保证金支付订单。",
+  );
   renderStats();
   renderListings();
   renderTrades();
@@ -187,6 +284,7 @@ function renderStats() {
   const sold = allListings.filter((item) => item.status === "sold").length;
   const reports = allReports.length;
   const trades = allTrades.length;
+  const paidOrders = allPayments.filter((item) => item.status === "paid").length;
   statsGrid.innerHTML = `
     <article><strong>${allListings.length}</strong><p>总商品数</p></article>
     <article><strong>${active}</strong><p>展示中</p></article>
@@ -194,6 +292,7 @@ function renderStats() {
     <article><strong>${sold}</strong><p>已成交</p></article>
     <article><strong>${reports}</strong><p>举报工单</p></article>
     <article><strong>${trades}</strong><p>担保交易申请</p></article>
+    <article><strong>${paidOrders}</strong><p>已支付保证金</p></article>
   `;
 }
 
@@ -256,10 +355,13 @@ function renderTrades() {
               trade.buyer_deposit_amount,
             )} · 卖家保证金 ${money(trade.seller_deposit_amount)}</p>
             <p>${escapeHtml(trade.message)}</p>
+            ${renderPaymentBadges(trade.id)}
             <p>${formatDate(trade.created_at)}</p>
           </div>
           <div class="admin-row-side">
             <span class="status-pill flagged">${tradeStatusLabel(trade.status)}</span>
+            <button data-payment-role="buyer" data-id="${trade.id}">买家保证金二维码</button>
+            <button data-payment-role="seller" data-id="${trade.id}">卖家保证金二维码</button>
             <button data-trade-status="pending_review" data-id="${trade.id}">待审核</button>
             <button data-trade-status="awaiting_deposit" data-id="${trade.id}">待交保证金</button>
             <button data-trade-status="in_escrow" data-id="${trade.id}">担保中</button>
@@ -313,6 +415,42 @@ async function updateTradeStatus(id, status) {
   renderTrades();
 }
 
+async function openAdminPayment(id, payerRole) {
+  if (!adminPaymentDialog || !adminPaymentResult) return;
+
+  adminPaymentResult.className = "payment-result loading";
+  adminPaymentResult.innerHTML = `
+    <strong>正在生成微信支付二维码</strong>
+    <p>${paymentRoleLabel(payerRole)}订单正在创建，请稍等。</p>
+  `;
+  adminPaymentDialog.showModal();
+
+  try {
+    const payment = await createWechatPayment(id, payerRole);
+    adminPaymentResult.className = "payment-result live";
+    adminPaymentResult.innerHTML = `
+      <strong>${paymentRoleLabel(payerRole)}二维码已生成</strong>
+      <p>金额：${settlementMoney(payment.amountCny)}。请让对应用户用微信扫码支付。</p>
+      <div class="payment-qr">
+        <canvas aria-label="微信支付二维码"></canvas>
+        <div>
+          <span>商户订单号</span>
+          <strong>${escapeHtml(payment.outTradeNo)}</strong>
+          <p>支付成功后，微信回调会把这笔订单标记为已支付。</p>
+        </div>
+      </div>
+    `;
+    await renderPaymentQr(adminPaymentResult, payment.codeUrl);
+    await loadAdminData();
+  } catch (error) {
+    adminPaymentResult.className = "payment-result error";
+    adminPaymentResult.innerHTML = `
+      <strong>二维码生成失败</strong>
+      <p>${escapeHtml(error.message || String(error))}</p>
+    `;
+  }
+}
+
 async function updateListingStatus(id, status) {
   const { error } = await db
     .from("listings")
@@ -345,6 +483,12 @@ adminListings?.addEventListener("click", (event) => {
   updateListingStatus(button.dataset.id, button.dataset.status);
 });
 adminTrades?.addEventListener("click", (event) => {
+  const paymentButton = event.target.closest("[data-payment-role]");
+  if (paymentButton) {
+    openAdminPayment(paymentButton.dataset.id, paymentButton.dataset.paymentRole);
+    return;
+  }
+
   const button = event.target.closest("[data-trade-status]");
   if (!button) return;
   updateTradeStatus(button.dataset.id, button.dataset.tradeStatus);
