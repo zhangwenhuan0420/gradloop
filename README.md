@@ -117,6 +117,8 @@ supabase functions deploy create-wechat-native-order
 supabase functions deploy wechat-pay-notify
 ```
 
+The repository includes `supabase/config.toml`. Both functions set `verify_jwt = false` because buyers may not be logged in when creating a QR code, and WeChat Pay notification webhooks cannot send a Supabase user JWT. Seller QR generation is still protected inside the function by checking the admin email session.
+
 5. After both functions deploy successfully, turn the frontend payment switch on in `config.js`:
 
 ```js

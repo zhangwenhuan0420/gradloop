@@ -1,0 +1,7 @@
+project_id = "rtlebdivzzmqnushmaeo"
+
+[functions.create-wechat-native-order]
+verify_jwt = false
+
+[functions.wechat-pay-notify]
+verify_jwt = false
