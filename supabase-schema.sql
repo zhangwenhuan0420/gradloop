@@ -22,7 +22,7 @@ create table if not exists public.listings (
   method text not null check (method in ('pickup', 'delivery', 'both')),
   seller_deposit_rate numeric(4, 2) not null default 0.5 check (seller_deposit_rate between 0 and 1),
   urgent boolean not null default false,
-  description text not null check (char_length(description) between 5 and 1200),
+  description text not null check (char_length(description) between 1 and 1200),
   image text,
   contact_name text not null check (char_length(contact_name) between 1 and 50),
   contact_method text not null check (contact_method in ('wechat', 'email', 'phone')),

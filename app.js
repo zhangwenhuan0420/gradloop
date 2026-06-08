@@ -210,6 +210,20 @@ function toDatabasePayload(listing) {
   };
 }
 
+function friendlyError(error) {
+  const message = error?.message || String(error || "");
+  if (message.includes("listings_description_check")) {
+    return "描述太短或太长。现在允许 1-1200 个字符；如果你仍看到这个提示，请在 Supabase SQL Editor 运行 fix-description-constraint.sql。";
+  }
+  if (message.includes("row-level security")) {
+    return "数据库权限策略阻止了发布，请确认已经运行 supabase-schema.sql。";
+  }
+  if (message.includes("Could not find the table") || message.includes("404")) {
+    return "数据库表还没创建，请先在 Supabase SQL Editor 运行 supabase-schema.sql。";
+  }
+  return message || "请检查数据库配置";
+}
+
 async function loadListings() {
   if (!db) {
     state.listings = loadDemoListings().map(normalizeListing);
@@ -420,6 +434,10 @@ async function addListing(event) {
   submitButton.textContent = "发布中...";
 
   try {
+    if (!listing.description) {
+      throw new Error("请填写商品描述。");
+    }
+
     if (db) {
       const { data, error } = await db.from("listings").insert(toDatabasePayload(listing)).select("*").single();
       if (error) throw error;
@@ -436,7 +454,7 @@ async function addListing(event) {
     alert(db ? "发布成功，商品已进入真实市场。" : "演示发布成功。配置 Supabase 后会进入真实数据库。");
   } catch (error) {
     console.error(error);
-    alert(`发布失败：${error.message || "请检查数据库配置"}`);
+    alert(`发布失败：${friendlyError(error)}`);
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "发布到市场";
