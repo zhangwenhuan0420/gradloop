@@ -340,6 +340,74 @@
       </form>
     </dialog>
 
+    <dialog class="post-dialog contact-dialog" id="contactDialog">
+      <form method="dialog" class="post-form">
+        <div class="dialog-title">
+          <div>
+            <p class="eyebrow">Contact card</p>
+            <h2>发布者名片</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <div id="contactCardContent"></div>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">先看看</button>
+          <button class="primary-button" id="openTradeRequest" value="default" type="button">发起平台担保交易</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="post-dialog" id="tradeDialog">
+      <form method="dialog" class="post-form" id="tradeForm">
+        <div class="dialog-title">
+          <div>
+            <p class="eyebrow">Protected trade</p>
+            <h2>发起担保交易申请</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭">×</button>
+        </div>
+        <input type="hidden" name="listingId" />
+        <div id="tradeSummary"></div>
+        <div class="form-grid">
+          <label>
+            你的称呼
+            <input name="buyerName" maxlength="40" placeholder="例如：小李" required />
+          </label>
+          <label>
+            联系方式类型
+            <select name="buyerContactMethod" required>
+              <option value="wechat">微信</option>
+              <option value="email">邮箱</option>
+              <option value="phone">手机号</option>
+            </select>
+          </label>
+          <label>
+            你的联系方式
+            <input name="buyerContactValue" maxlength="100" placeholder="用于卖家和平台联系你" required />
+          </label>
+          <label>
+            交易方式
+            <select name="fulfillmentMethod" required>
+              <option value="pickup">同城面交</option>
+              <option value="delivery">快递</option>
+            </select>
+          </label>
+        </div>
+        <label>
+          留言给卖家/平台
+          <textarea name="message" rows="4" maxlength="1000" placeholder="例如：我今晚可以在学校门口面交，想走平台担保。" required></textarea>
+        </label>
+        <div class="notice">
+          <strong>当前为担保交易申请</strong>
+          <p>提交后会进入管理员后台。正式保证金支付接入前，平台会先人工联系双方确认交易。</p>
+        </div>
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel">取消</button>
+          <button class="primary-button" value="default" type="submit">提交担保交易申请</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./config.js"></script>
     <script src="./app.js"></script>

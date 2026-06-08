@@ -137,11 +137,18 @@ const postDialog = document.querySelector("#postDialog");
 const postForm = document.querySelector("#postForm");
 const reportDialog = document.querySelector("#reportDialog");
 const reportForm = document.querySelector("#reportForm");
+const contactDialog = document.querySelector("#contactDialog");
+const contactCardContent = document.querySelector("#contactCardContent");
+const openTradeRequestButton = document.querySelector("#openTradeRequest");
+const tradeDialog = document.querySelector("#tradeDialog");
+const tradeForm = document.querySelector("#tradeForm");
+const tradeSummary = document.querySelector("#tradeSummary");
 const backendStatus = document.querySelector("#backendStatus");
 const reviewPrice = document.querySelector("#reviewPrice");
 const penaltyRate = document.querySelector("#penaltyRate");
 const penaltyRateLabel = document.querySelector("#penaltyRateLabel");
 const penaltyAmount = document.querySelector("#penaltyAmount");
+let selectedListing = null;
 
 function setBackendStatus(kind, title, detail) {
   if (!backendStatus) return;
@@ -220,6 +227,9 @@ function friendlyError(error) {
   }
   if (message.includes("Could not find the table") || message.includes("404")) {
     return "数据库表还没创建，请先在 Supabase SQL Editor 运行 supabase-schema.sql。";
+  }
+  if (message.includes("trade_requests")) {
+    return "担保交易表还没创建，请在 Supabase SQL Editor 运行 add-trade-requests.sql。";
   }
   return message || "请检查数据库配置";
 }
@@ -467,6 +477,105 @@ function openReportDialog(id) {
   reportDialog.showModal();
 }
 
+function contactCardHtml(item) {
+  const escrow = escrowFor(item);
+  const isBuy = item.type === "buy";
+  return `
+    <div class="contact-card">
+      <div class="contact-card-main">
+        <img src="${escapeHtml(item.image || DEFAULT_IMAGE)}" alt="${escapeHtml(item.title)}" />
+        <div>
+          <span class="badge ${isBuy ? "buy" : ""}">${isBuy ? "买家需求" : "卖家商品"}</span>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.city)} · ${escapeHtml(item.category)} · ${money(item.price)}</p>
+        </div>
+      </div>
+      <div class="contact-details">
+        <div>
+          <span>发布者</span>
+          <strong>${escapeHtml(item.contactName)}</strong>
+        </div>
+        <div>
+          <span>${contactMethodLabel(item.contactMethod)}</span>
+          <strong>${escapeHtml(item.contactValue)}</strong>
+        </div>
+        <div>
+          <span>买家托管保证金</span>
+          <strong>${money(escrow.buyerDeposit)}</strong>
+        </div>
+        <div>
+          <span>卖家保证金</span>
+          <strong>${money(escrow.sellerDeposit)}</strong>
+        </div>
+      </div>
+      <div class="notice">
+        <strong>建议走平台担保交易</strong>
+        <p>直接联系适合快速沟通；如果金额较高或需要保障，可以点击“发起平台担保交易”，由平台后台记录交易申请并跟进双方。</p>
+      </div>
+    </div>
+  `;
+}
+
+function openContactCard(id) {
+  selectedListing = state.listings.find((listing) => listing.id === id);
+  if (!selectedListing || !contactDialog || !contactCardContent) return;
+  contactCardContent.innerHTML = contactCardHtml(selectedListing);
+  contactDialog.showModal();
+}
+
+function openTradeDialog() {
+  if (!selectedListing || !tradeDialog || !tradeForm || !tradeSummary) return;
+  const escrow = escrowFor(selectedListing);
+  tradeForm.elements.listingId.value = selectedListing.id;
+  tradeSummary.innerHTML = `
+    <div class="trade-summary">
+      <strong>${escapeHtml(selectedListing.title)}</strong>
+      <span>${escapeHtml(selectedListing.city)} · ${money(selectedListing.price)}</span>
+      <span>买家需托管：${money(escrow.buyerDeposit)} · 卖家保证金：${money(escrow.sellerDeposit)}</span>
+    </div>
+  `;
+  contactDialog?.close();
+  tradeDialog.showModal();
+}
+
+async function submitTradeRequest(event) {
+  event.preventDefault();
+  const formData = new FormData(tradeForm);
+  const listing = state.listings.find((item) => item.id === formData.get("listingId"));
+  if (!listing) {
+    alert("商品不存在，请刷新页面后再试。");
+    return;
+  }
+
+  const escrow = escrowFor(listing);
+  const request = {
+    listing_id: listing.id,
+    buyer_name: formData.get("buyerName").trim(),
+    buyer_contact_method: formData.get("buyerContactMethod"),
+    buyer_contact_value: formData.get("buyerContactValue").trim(),
+    fulfillment_method: formData.get("fulfillmentMethod"),
+    message: formData.get("message").trim(),
+    buyer_deposit_amount: escrow.buyerDeposit,
+    seller_deposit_amount: escrow.sellerDeposit,
+    status: "pending_review",
+  };
+
+  try {
+    if (db) {
+      const { error } = await db.from("trade_requests").insert(request);
+      if (error) throw error;
+      alert("担保交易申请已提交。管理员会在后台看到，并联系双方确认下一步。");
+    } else {
+      alert("演示模式下不会进入后台。配置 Supabase 后，担保交易申请会保存到数据库。");
+    }
+    tradeForm.reset();
+    tradeDialog.close();
+  } catch (error) {
+    console.error(error);
+    alert(`提交失败：${friendlyError(error)}`);
+  }
+}
+
 async function submitReport(event) {
   event.preventDefault();
   const formData = new FormData(reportForm);
@@ -523,13 +632,7 @@ grid.addEventListener("click", (event) => {
   }
 
   if (contactButton) {
-    const item = state.listings.find((listing) => listing.id === contactButton.dataset.contact);
-    const escrow = escrowFor(item);
-    alert(
-      `${item.contactName} 的${contactMethodLabel(item.contactMethod)}：${item.contactValue}\n\n保证金预估：买家托管 ${money(
-        escrow.buyerDeposit,
-      )}，卖家保证金 ${money(escrow.sellerDeposit)}。请优先选择公共地点面交并保留聊天记录。`,
-    );
+    openContactCard(contactButton.dataset.contact);
   }
 
   if (reportButton) {
@@ -539,6 +642,8 @@ grid.addEventListener("click", (event) => {
 
 postForm.addEventListener("submit", addListing);
 reportForm?.addEventListener("submit", submitReport);
+openTradeRequestButton?.addEventListener("click", openTradeDialog);
+tradeForm?.addEventListener("submit", submitTradeRequest);
 
 function updatePenaltyReview() {
   if (!reviewPrice || !penaltyRate || !penaltyRateLabel || !penaltyAmount) return;

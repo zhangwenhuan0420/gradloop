@@ -6,6 +6,7 @@ GradLoop is a UK student second-hand marketplace. This version can run as a real
 - Database/Auth: Supabase
 - Public users can post listings and submit reports
 - Admins can log in, review listings, hide/restore listings, mark sold, and read reports
+- Buyers can submit protected trade requests for admin follow-up
 
 ## 1. Create Supabase Project
 
@@ -18,6 +19,7 @@ The script creates:
 
 - `listings`
 - `listing_reports`
+- `trade_requests`
 - `admin_users`
 - Row Level Security policies
 
@@ -89,3 +91,17 @@ This MVP is ready for basic public use, but payments/escrow are not enabled yet.
 - reports handled through the admin page
 
 Add payment, deposit custody, and dispute funds only after legal/payment-provider review.
+
+## Existing Project Migrations
+
+If your project was created before protected trade requests were added, run:
+
+```text
+add-trade-requests.sql
+```
+
+If short listing descriptions fail, run:
+
+```text
+fix-description-constraint.sql
+```

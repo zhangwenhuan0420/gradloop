@@ -18,6 +18,7 @@
       <nav class="nav" aria-label="管理导航">
         <a href="./index.html#market">返回市场</a>
         <a href="#listings">商品审核</a>
+        <a href="#trades">担保交易</a>
         <a href="#reports">举报工单</a>
       </nav>
       <button class="ghost-button" id="signOutButton" hidden>退出</button>
@@ -78,6 +79,24 @@
           </select>
         </div>
         <div class="admin-table" id="adminListings"></div>
+      </section>
+
+      <section class="admin-section" id="trades" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Protected trades</p>
+            <h2>担保交易申请</h2>
+          </div>
+          <select id="tradeStatusFilter" aria-label="交易状态筛选">
+            <option value="all">全部状态</option>
+            <option value="pending_review">待审核</option>
+            <option value="awaiting_deposit">待交保证金</option>
+            <option value="in_escrow">担保中</option>
+            <option value="completed">已完成</option>
+            <option value="cancelled">已取消</option>
+          </select>
+        </div>
+        <div class="admin-table" id="adminTrades"></div>
       </section>
 
       <section class="admin-section" id="reports" hidden>
