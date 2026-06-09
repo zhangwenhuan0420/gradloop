@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 $SecretsFile = Join-Path $Root "supabase\.env.wechat.local"
 $AccessTokenFile = Join-Path $Root "supabase\.supabase-access-token.local"
+$LocalSupabaseCli = Join-Path $Root "..\..\.tools\supabase-cli\supabase.exe"
 
 $RequiredSecrets = @(
   "WECHAT_PAY_MCH_ID",
@@ -19,7 +20,12 @@ $RequiredSecrets = @(
   "GBP_TO_CNY_RATE"
 )
 
-if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) {
+$SupabaseCommand = Get-Command supabase -ErrorAction SilentlyContinue
+if ($SupabaseCommand) {
+  $SupabaseCli = $SupabaseCommand.Source
+} elseif (Test-Path $LocalSupabaseCli) {
+  $SupabaseCli = (Resolve-Path $LocalSupabaseCli).Path
+} else {
   throw "Supabase CLI is not installed. Install it first, then rerun this script."
 }
 
@@ -58,8 +64,8 @@ if (-not $env:SUPABASE_ACCESS_TOKEN -or $env:SUPABASE_ACCESS_TOKEN -match "REPLA
   throw "Missing SUPABASE_ACCESS_TOKEN. Set it as an environment variable or put it in $AccessTokenFile"
 }
 
-supabase secrets set --env-file $SecretsFile --project-ref $ProjectRef
-supabase functions deploy create-wechat-native-order --project-ref $ProjectRef
-supabase functions deploy wechat-pay-notify --project-ref $ProjectRef
+& $SupabaseCli secrets set --env-file $SecretsFile --project-ref $ProjectRef
+& $SupabaseCli functions deploy create-wechat-native-order --project-ref $ProjectRef
+& $SupabaseCli functions deploy wechat-pay-notify --project-ref $ProjectRef
 
 Write-Host "WeChat Pay Edge Functions deployed for project $ProjectRef."
