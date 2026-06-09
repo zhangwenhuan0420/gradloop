@@ -15,6 +15,19 @@ function requiredEnv(name: string) {
   return value;
 }
 
+function supabaseSecretKey() {
+  const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (legacy) return legacy;
+
+  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (secretKeys) {
+    const parsed = JSON.parse(secretKeys);
+    if (parsed.default) return parsed.default;
+  }
+
+  throw new HttpError("Missing Supabase secret key for admin operations.", 500);
+}
+
 function normalizePem(value: string, label: "PUBLIC KEY") {
   const normalized = value.trim().replace(/\\n/g, "\n");
   if (normalized.includes(`BEGIN ${label}`)) return normalized;
@@ -143,7 +156,7 @@ Deno.serve(async (req) => {
     const outTradeNo = transaction.out_trade_no;
     if (!outTradeNo) throw new HttpError("out_trade_no is missing in notification.", 400);
 
-    const adminClient = createClient(requiredEnv("SUPABASE_URL"), requiredEnv("SUPABASE_SERVICE_ROLE_KEY"), {
+    const adminClient = createClient(requiredEnv("SUPABASE_URL"), supabaseSecretKey(), {
       auth: {
         persistSession: false,
       },

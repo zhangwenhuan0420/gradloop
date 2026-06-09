@@ -99,7 +99,6 @@ Never put `apiclient_key.pem`, API v3 key, service role key, or platform private
 
 ```text
 SUPABASE_URL=https://rtlebdivzzmqnushmaeo.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your Supabase service role key
 WECHAT_PAY_MCH_ID=your merchant id
 WECHAT_PAY_APP_ID=your bound app id
 WECHAT_PAY_CERT_SERIAL_NO=your merchant API certificate serial number
@@ -109,6 +108,8 @@ WECHAT_PAY_PLATFORM_PUBLIC_KEY=the full WeChat Pay platform public key PEM
 WECHAT_PAY_NOTIFY_URL=https://rtlebdivzzmqnushmaeo.functions.supabase.co/wechat-pay-notify
 GBP_TO_CNY_RATE=9.20
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` is no longer required for hosted Supabase projects because Edge Functions can read the automatically injected `SUPABASE_SECRET_KEYS`. Only add a manual service role secret if your project does not expose the default secret keys.
 
 4. Deploy Edge Functions:
 
