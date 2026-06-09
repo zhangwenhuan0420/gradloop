@@ -102,9 +102,9 @@ SUPABASE_URL=https://rtlebdivzzmqnushmaeo.supabase.co
 WECHAT_PAY_MCH_ID=your merchant id
 WECHAT_PAY_APP_ID=your bound app id
 WECHAT_PAY_CERT_SERIAL_NO=your merchant API certificate serial number
-WECHAT_PAY_PRIVATE_KEY=the full apiclient_key.pem content
+WECHAT_PAY_PRIVATE_KEY_FILE=C:\path\to\apiclient_key.pem
 WECHAT_PAY_API_V3_KEY=your 32-character API v3 key
-WECHAT_PAY_PLATFORM_PUBLIC_KEY=the full WeChat Pay platform public key PEM
+WECHAT_PAY_PLATFORM_PUBLIC_KEY_FILE=C:\path\to\wechatpay_platform_public_key.pem
 WECHAT_PAY_NOTIFY_URL=https://rtlebdivzzmqnushmaeo.functions.supabase.co/wechat-pay-notify
 GBP_TO_CNY_RATE=9.20
 ```
