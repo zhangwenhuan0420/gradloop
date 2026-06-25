@@ -1,0 +1,36 @@
+{
+  "name": "GradLoop 英国留学生二手交易",
+  "short_name": "GradLoop",
+  "description": "面向英国留学生的二手交易、同城面交、快递和平台担保交易 App。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffdf7",
+  "theme_color": "#237a4c",
+  "categories": ["shopping", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "发布商品",
+      "short_name": "发布",
+      "description": "快速发布想卖或想买的二手信息",
+      "url": "./index.html#market",
+      "icons": [{ "src": "./app-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "管理后台",
+      "short_name": "管理",
+      "description": "打开平台管理后台",
+      "url": "./admin.html",
+      "icons": [{ "src": "./app-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

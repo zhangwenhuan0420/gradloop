@@ -8,6 +8,7 @@ GradLoop is a UK student second-hand marketplace. This version can run as a real
 - Admins can log in, review listings, hide/restore listings, mark sold, and read reports
 - Buyers can submit protected trade requests for admin follow-up
 - Optional WeChat Pay Native QR deposit flow through Supabase Edge Functions
+- Installable PWA app shell with mobile bottom navigation
 
 ## 1. Create Supabase Project
 
@@ -146,6 +147,17 @@ Admin page:
 ```text
 https://zhangwenhuan0420.github.io/gradloop/admin.html
 ```
+
+## Mobile App Trial
+
+GradLoop now ships as a PWA. Users can open the GitHub Pages URL on mobile and add it to the phone home screen. The app shell includes:
+
+- `manifest.webmanifest`
+- `sw.js`
+- `app-icon.svg`
+- mobile bottom navigation for home, search, publish, protected trade, and admin/profile entry
+
+This is the fastest production-style trial before building a native iOS/Android app. A later native version can reuse the same Supabase backend and product flow.
 
 ## Operating Notes
 

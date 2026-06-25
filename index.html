@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GradLoop | 英国留学生二手交易</title>
+    <meta name="theme-color" content="#237a4c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="GradLoop" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./app-icon.svg" />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -24,6 +30,7 @@
         <a href="./admin.html">管理者</a>
       </nav>
       <button class="ghost-button" id="openPostTop">发布</button>
+      <button class="ghost-button install-button" id="installAppButton" hidden>安装 App</button>
     </header>
 
     <main>
@@ -408,6 +415,29 @@
         </div>
       </form>
     </dialog>
+
+    <nav class="app-tabbar" aria-label="手机 App 导航">
+      <a href="#market" aria-label="首页">
+        <span>⌂</span>
+        首页
+      </a>
+      <a href="#market" aria-label="搜索商品">
+        <span>⌕</span>
+        搜索
+      </a>
+      <button id="openPostTab" type="button" aria-label="发布商品">
+        <span>＋</span>
+        发布
+      </button>
+      <a href="#escrow" aria-label="担保交易">
+        <span>◆</span>
+        担保
+      </a>
+      <a href="./admin.html" aria-label="我的和管理">
+        <span>◎</span>
+        我的
+      </a>
+    </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>

@@ -199,6 +199,15 @@ h3 {
   font-weight: 700;
 }
 
+.install-button {
+  display: none;
+}
+
+.install-button.ready {
+  display: inline-flex;
+  align-items: center;
+}
+
 .hero-stats {
   display: flex;
   flex-wrap: wrap;
@@ -1022,6 +1031,49 @@ textarea:focus {
   height: 18px;
 }
 
+.app-tabbar {
+  display: none;
+}
+
+.app-tabbar a,
+.app-tabbar button {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.app-tabbar span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent-dark);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-tabbar button {
+  color: var(--accent-dark);
+}
+
+.app-tabbar button span {
+  width: 42px;
+  height: 42px;
+  margin-top: -24px;
+  color: white;
+  background: var(--accent);
+  box-shadow: 0 12px 24px rgba(35, 122, 76, 0.26);
+  font-size: 26px;
+}
+
 @media (max-width: 900px) {
   .nav {
     display: none;
@@ -1076,8 +1128,14 @@ textarea:focus {
 }
 
 @media (max-width: 560px) {
+  body {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+
   .topbar {
+    position: sticky;
     gap: 12px;
+    padding: 10px 14px;
   }
 
   .brand small {
@@ -1086,6 +1144,14 @@ textarea:focus {
 
   .ghost-button {
     padding: 10px 12px;
+  }
+
+  .install-button.ready {
+    display: none;
+  }
+
+  .hero {
+    padding-top: 26px;
   }
 
   h1 {
@@ -1130,5 +1196,19 @@ textarea:focus {
     width: 100%;
     max-width: 220px;
     height: auto;
+  }
+
+  .app-tabbar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(223, 231, 223, 0.9);
+    background: rgba(255, 253, 247, 0.94);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 -12px 28px rgba(23, 33, 27, 0.08);
   }
 }

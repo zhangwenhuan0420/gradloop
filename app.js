@@ -152,7 +152,9 @@ const reviewPrice = document.querySelector("#reviewPrice");
 const penaltyRate = document.querySelector("#penaltyRate");
 const penaltyRateLabel = document.querySelector("#penaltyRateLabel");
 const penaltyAmount = document.querySelector("#penaltyAmount");
+const installAppButton = document.querySelector("#installAppButton");
 let selectedListing = null;
+let deferredInstallPrompt = null;
 
 function setBackendStatus(kind, title, detail) {
   if (!backendStatus) return;
@@ -709,7 +711,7 @@ async function submitReport(event) {
   }
 }
 
-document.querySelectorAll("#openPostTop, #openPostHero, #openPostFilter").forEach((button) => {
+document.querySelectorAll("#openPostTop, #openPostHero, #openPostFilter, #openPostTab").forEach((button) => {
   button.addEventListener("click", openPostDialog);
 });
 
@@ -751,6 +753,34 @@ postForm.addEventListener("submit", addListing);
 reportForm?.addEventListener("submit", submitReport);
 openTradeRequestButton?.addEventListener("click", openTradeDialog);
 tradeForm?.addEventListener("submit", submitTradeRequest);
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installAppButton?.classList.add("ready");
+  if (installAppButton) installAppButton.hidden = false;
+});
+
+installAppButton?.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installAppButton.classList.remove("ready");
+  installAppButton.hidden = true;
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  installAppButton?.classList.remove("ready");
+  if (installAppButton) installAppButton.hidden = true;
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => console.warn("Service worker registration failed", error));
+  });
+}
 
 function updatePenaltyReview() {
   if (!reviewPrice || !penaltyRate || !penaltyRateLabel || !penaltyAmount) return;
