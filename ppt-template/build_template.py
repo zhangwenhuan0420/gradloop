@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import copy
-import shutil
 import zipfile
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -33,7 +32,7 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.opc.packuri import PackURI
 from pptx.oxml import parse_xml
 from pptx.oxml.ns import nsdecls, qn
-from pptx.util import Emu, Inches, Pt
+from pptx.util import Emu, Inches
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
@@ -165,7 +164,7 @@ def _lvl_ppr(
         bu = '<a:buFont typeface="Arial" pitchFamily="34" charset="0"/><a:buChar char="&#8226;"/>'
     elif bullet == "number":
         mar = f' marL="{_emu(indent)}" indent="{-_emu(indent)}"'
-        bu = f'<a:buFont typeface="+mn-lt"/><a:buAutoNum type="arabicPeriod"/>'
+        bu = '<a:buFont typeface="+mn-lt"/><a:buAutoNum type="arabicPeriod"/>'
     else:
         mar = ' marL="0" indent="0"'
         bu = "<a:buNone/>"
