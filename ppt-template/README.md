@@ -16,6 +16,16 @@
 | `assets/phone-frame.png` | 从原 PDF 里抠出来的透明 iPhone 边框，屏幕区域是镂空的 |
 | `build_template.py` | 生成上面两个文件的脚本，改设计改这里 |
 | `preview/layouts.png` | 14 个版式的缩略图总览 |
+| `preview/1Fit-KOL-Template-preview.pdf` | 14 页的 PDF 版，没装 PowerPoint 也能看 |
+
+## 直接下载
+
+仓库是公开的，下面的链接不用登录就能下：
+
+- [`1Fit-KOL-Template.pptx`](https://github.com/zhangwenhuan0420/gradloop/raw/refs/heads/cursor/1fit-kol-ppt-template-43ea/ppt-template/dist/1Fit-KOL-Template.pptx)（示例稿，14 页）
+- [`1Fit-KOL-Template.potx`](https://github.com/zhangwenhuan0420/gradloop/raw/refs/heads/cursor/1fit-kol-ppt-template-43ea/ppt-template/dist/1Fit-KOL-Template.potx)（模板文件）
+- [整个目录打包 zip](https://github.com/zhangwenhuan0420/gradloop/archive/refs/heads/cursor/1fit-kol-ppt-template-43ea.zip)（含字体，推荐）
+- [PDF 预览](https://github.com/zhangwenhuan0420/gradloop/raw/refs/heads/cursor/1fit-kol-ppt-template-43ea/ppt-template/preview/1Fit-KOL-Template-preview.pdf)
 
 ## 开始使用
 
